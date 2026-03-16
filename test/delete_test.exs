@@ -1,11 +1,11 @@
-defmodule Tus.DeleteTest do
+defmodule Tussle.DeleteTest do
   use ExUnit.Case, async: true
   use Plug.Test
-  doctest Tus.Delete
+  doctest Tussle.Delete
 
   import Plug.Conn.Status, only: [code: 1]
-  import Tus.TestHelpers, only: [test_conn: 2, get_config: 0]
-  alias Tus.TestController
+  import Tussle.TestHelpers, only: [test_conn: 2, get_config: 0]
+  alias Tussle.TestController
 
   setup_all do
     %{config: get_config()}
@@ -15,7 +15,7 @@ defmodule Tus.DeleteTest do
     conn =
       test_conn(:patch, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-offset", "0"},
           {"content-type", "application/offset+octet-stream"}
         ]
@@ -29,7 +29,7 @@ defmodule Tus.DeleteTest do
     config = context[:config]
     uid = "ibelieveicanfly"
 
-    file = %Tus.File{
+    file = %Tussle.File{
       uid: uid,
       offset: 0,
       size: 123,
@@ -40,7 +40,7 @@ defmodule Tus.DeleteTest do
     conn =
       test_conn(:delete, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-offset", "0"},
           {"content-type", "application/offset+octet-stream"}
         ]
@@ -58,7 +58,7 @@ defmodule Tus.DeleteTest do
 
     file =
       config.storage.create(
-        %Tus.File{
+        %Tussle.File{
           uid: uid,
           offset: 0,
           size: 123,
@@ -71,7 +71,7 @@ defmodule Tus.DeleteTest do
     conn =
       test_conn(:delete, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-offset", "0"},
           {"content-type", "application/offset+octet-stream"}
         ]

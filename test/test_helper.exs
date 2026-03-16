@@ -1,5 +1,5 @@
-defmodule Tus.TestController do
-  use Tus.Controller
+defmodule Tussle.TestController do
+  use Tussle.Controller
 
   def init_file(file, conn) do
     send self(), {:init_file, conn}
@@ -17,7 +17,7 @@ defmodule Tus.TestController do
   end
 end
 
-defmodule Tus.TestHelpers do
+defmodule Tussle.TestHelpers do
   def test_conn(method, conn \\ [], uri \\ "/", body \\ nil) do
     Plug.Adapters.Test.Conn.conn(
       conn,
@@ -28,12 +28,12 @@ defmodule Tus.TestHelpers do
   end
 
   def get_config do
-    Application.get_env(:tus, Tus.TestController)
+    Application.get_env(:tussle, Tussle.TestController)
     |> Enum.into(%{})
-    |> Map.put(:cache_name,  Module.concat(Tus.TestController, TusCache))
+    |> Map.put(:cache_name,  Module.concat(Tussle.TestController, TussleCache))
   end
 end
 
 ExUnit.start()
-config = Tus.TestHelpers.get_config()
+config = Tussle.TestHelpers.get_config()
 config.cache.start_link(config)

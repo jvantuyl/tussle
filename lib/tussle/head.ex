@@ -1,4 +1,4 @@
-defmodule Tus.Head do
+defmodule Tussle.Head do
   @moduledoc """
   """
   import Plug.Conn
@@ -11,7 +11,7 @@ defmodule Tus.Head do
         # by adding the Cache-Control: no-store header to the response.
         |> put_resp_header("cache-control", "no-store"),
 
-        Tus.cache_get(config)
+        Tussle.cache_get(config)
     )
   end
 

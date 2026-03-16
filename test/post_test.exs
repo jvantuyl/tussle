@@ -1,11 +1,11 @@
-defmodule Tus.PostTest do
-  use ExUnit.Case, async: true
+defmodule Tussle.PostTest do
+  use ExUnit.Case, async: false
   use Plug.Test
-  doctest Tus.Post
+  doctest Tussle.Post
 
   import Plug.Conn.Status, only: [code: 1]
-  import Tus.TestHelpers, only: [test_conn: 2, get_config: 0]
-  alias Tus.TestController
+  import Tussle.TestHelpers, only: [test_conn: 2, get_config: 0]
+  alias Tussle.TestController
 
   setup_all do
     %{config: get_config()}
@@ -18,7 +18,7 @@ defmodule Tus.PostTest do
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "#{config.max_size + 1}"}
         ]
       })
@@ -33,7 +33,7 @@ defmodule Tus.PostTest do
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "#{soft_limit + 1}"},
           {"tus-max-size", "#{soft_limit}"}
         ]
@@ -49,7 +49,7 @@ defmodule Tus.PostTest do
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "#{config.max_size + 1}"},
           {"tus-max-size", "#{config.max_size + 10}"}
         ]
@@ -66,7 +66,7 @@ defmodule Tus.PostTest do
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "#{size}"}
         ]
       })
@@ -74,7 +74,7 @@ defmodule Tus.PostTest do
     response = TestController.post(conn)
 
     assert response.status == code(:created)
-    assert response |> get_resp_header("tus-resumable") == [Tus.latest_version()]
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
     assert response |> get_resp_header("upload-offset") == []
     assert response |> get_resp_header("upload-length") == []
 
@@ -90,19 +90,19 @@ defmodule Tus.PostTest do
 
   test "create a new upload with expiration period enabled", context do
     config = context[:config]
-    app_env = Application.get_env(:tus, Tus.TestController, [])
+    app_env = Application.get_env(:tussle, Tussle.TestController, [])
 
     new_app_env =
       app_env
       |> Keyword.update(:expiration_period, 300, fn _ -> 300 end)
 
-    Application.put_env(:tus, Tus.TestController, new_app_env)
+    Application.put_env(:tussle, Tussle.TestController, new_app_env)
     size = 10
 
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "#{size}"}
         ]
       })
@@ -110,7 +110,7 @@ defmodule Tus.PostTest do
     response = TestController.post(conn)
 
     assert response.status == code(:created)
-    assert response |> get_resp_header("tus-resumable") == [Tus.latest_version()]
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
     assert response |> get_resp_header("upload-offset") == []
     assert response |> get_resp_header("upload-length") == []
 
@@ -127,52 +127,52 @@ defmodule Tus.PostTest do
     File.rm_rf(config.base_path |> Path.expand())
 
     on_exit(fn ->
-      Application.put_env(:tus, Tus.TestController, app_env)
+      Application.put_env(:tussle, Tussle.TestController, app_env)
     end)
   end
 
   test "parse metadata" do
     metadata_src = "filename d29ybGRfZG9taW5hdGlvbl9wbGFuLnBkZg==,username YnJhaW4="
 
-    expected = [
-      {"filename", "world_domination_plan.pdf"},
-      {"username", "brain"}
-    ]
+    expected = %{
+      "filename" => "world_domination_plan.pdf",
+      "username" => "brain"
+    }
 
-    assert Tus.Post.parse_metadata(metadata_src) == expected
+    assert Tussle.Post.parse_metadata(metadata_src) == expected
   end
 
   test "parse metadata with invalid spaces" do
     metadata_src = "filename  d29ybGRfZG9taW5hdGlvbl9wbGFuLnBkZg== , username YnJhaW4="
 
-    expected = [
-      {"filename", "world_domination_plan.pdf"},
-      {"username", "brain"}
-    ]
+    expected = %{
+      "filename" => "world_domination_plan.pdf",
+      "username" => "brain"
+    }
 
-    assert Tus.Post.parse_metadata(metadata_src) == expected
+    assert Tussle.Post.parse_metadata(metadata_src) == expected
   end
 
   test "parse metadata with key followed by a space and empty value" do
     metadata_src = "filename ,username YnJhaW4="
 
-    expected = [
-      {"filename", nil},
-      {"username", "brain"}
-    ]
+    expected = %{
+      "filename" => nil,
+      "username" => "brain"
+    }
 
-    assert Tus.Post.parse_metadata(metadata_src) == expected
+    assert Tussle.Post.parse_metadata(metadata_src) == expected
   end
 
   test "parse metadata with only key" do
     metadata_src = "filename,username YnJhaW4="
 
-    expected = [
-      {"filename", nil},
-      {"username", "brain"}
-    ]
+    expected = %{
+      "filename" => nil,
+      "username" => "brain"
+    }
 
-    assert Tus.Post.parse_metadata(metadata_src) == expected
+    assert Tussle.Post.parse_metadata(metadata_src) == expected
   end
 
   test "create a new upload with metadata", context do
@@ -182,7 +182,7 @@ defmodule Tus.PostTest do
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "10"},
           {"upload-metadata", metadata_src}
         ]
@@ -196,10 +196,10 @@ defmodule Tus.PostTest do
 
     file = config.cache.get(config.cache_name, uid)
 
-    expected = [
-      {"filename", "world_domination_plan.pdf"},
-      {"username", "brain"}
-    ]
+    expected = %{
+      "filename" => "world_domination_plan.pdf",
+      "username" => "brain"
+    }
 
     assert file
     assert file.metadata_src == metadata_src
@@ -214,7 +214,7 @@ defmodule Tus.PostTest do
     TestController.post(
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "10"}
         ]
       })
@@ -232,7 +232,7 @@ defmodule Tus.PostTest do
     TestController.post(
       test_conn(:post, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-length", "10"}
         ]
       })

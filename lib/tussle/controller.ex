@@ -1,4 +1,4 @@
-defmodule Tus.Controller do
+defmodule Tussle.Controller do
   defmacro __using__(_) do
     quote do
       @allowed_methods ~w(OPTIONS HEAD PATCH DELETE)
@@ -49,9 +49,9 @@ defmodule Tus.Controller do
 
       defp update_config(conn, config) do
         app_env =
-          Application.get_env(:tus, __MODULE__, [])
+          Application.get_env(:tussle, __MODULE__, [])
           |> Enum.into(%{})
-          |> Map.put(:cache_name, Module.concat(__MODULE__, TusCache))
+          |> Map.put(:cache_name, Module.concat(__MODULE__, TussleCache))
           |> Map.put(:version, get_version(conn))
           |> Map.put(:on_begin_upload, &on_begin_upload/1)
           |> Map.put(:on_complete_upload, &on_complete_upload/1)
@@ -81,7 +81,7 @@ defmodule Tus.Controller do
       defp override_original_method(_, conn), do: conn
 
       defp call_versioned_method(:options, conn, config) do
-        Tus.options(conn, config)
+        Tussle.options(conn, config)
       end
 
       defp call_versioned_method(_method, conn, %{version: nil}) do
@@ -89,7 +89,7 @@ defmodule Tus.Controller do
       end
 
       defp call_versioned_method(method, conn, config) do
-        apply(Tus, method, [conn, config])
+        apply(Tussle, method, [conn, config])
       end
     end
   end

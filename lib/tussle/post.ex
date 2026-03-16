@@ -1,4 +1,4 @@
-defmodule Tus.Post do
+defmodule Tussle.Post do
   @moduledoc """
   An empty POST request is used to create a new upload resource
   """
@@ -21,7 +21,7 @@ defmodule Tus.Post do
       conn
       |> put_resp_header("tus-resumable", config.version)
       |> put_resp_header("location", location)
-      |> Tus.add_expire_hdr(file, config)
+      |> Tussle.add_expire_hdr(file, config)
       |> resp(:created, "")
     else
       :too_large ->
@@ -48,7 +48,7 @@ defmodule Tus.Post do
         %{}
       end
 
-    file = %Tus.File{
+    file = %Tussle.File{
       uid: UUID.uuid1(),
       size: get_size(conn),
       created_at: DateTime.to_unix(DateTime.utc_now()),
@@ -97,12 +97,12 @@ defmodule Tus.Post do
   end
 
   defp create_file(file, config) do
-    file = Tus.storage_create(file, config)
+    file = Tussle.storage_create(file, config)
     {:ok, file}
   end
 
   defp cache_file(file, config) do
-    Tus.cache_put(file, config)
+    Tussle.cache_put(file, config)
     :ok
   end
 end

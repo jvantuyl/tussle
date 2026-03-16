@@ -1,10 +1,10 @@
-defmodule Tus.Patch do
+defmodule Tussle.Patch do
   @moduledoc """
   """
   import Plug.Conn
 
   def patch(conn, %{version: version} = config) when version == "1.0.0" do
-    with {:ok, %Tus.File{} = file} <- get_file(config),
+    with {:ok, %Tussle.File{} = file} <- get_file(config),
          :ok <- offsets_match?(conn, file),
          {:ok, data, conn} <- get_body(conn),
          data_size <- byte_size(data),
@@ -14,7 +14,7 @@ defmodule Tus.Patch do
       conn
       |> put_resp_header("tus-resumable", config.version)
       |> put_resp_header("upload-offset", "#{file.offset}")
-      |> Tus.add_expire_hdr(file, config)
+      |> Tussle.add_expire_hdr(file, config)
       |> resp(:no_content, "")
     else
       :file_not_found ->
@@ -37,16 +37,16 @@ defmodule Tus.Patch do
     end
   end
 
-  defp maybe_upload_completed(file, new_offset, config) do
-    file = %Tus.File{file | offset: new_offset}
-    Tus.cache_put(file, config)
+  defp maybe_upload_completed(%Tussle.File{} = file, new_offset, config) do
+    file = %{file | offset: new_offset}
+    Tussle.cache_put(file, config)
 
     case upload_completed?(file) do
       true ->
-        Tus.storage_complete_upload(file, config)
+        Tussle.storage_complete_upload(file, config)
         res = file |> config.on_complete_upload.() |> on_complete_upload_result(file)
 
-        Tus.cache_delete(file, config)
+        Tussle.cache_delete(file, config)
         res
 
       false ->
@@ -58,8 +58,8 @@ defmodule Tus.Patch do
   defp on_complete_upload_result(_callback_res, file), do: {:ok, file}
 
   defp get_file(config) do
-    case Tus.cache_get(config) do
-      %Tus.File{} = file -> {:ok, file}
+    case Tussle.cache_get(config) do
+      %Tussle.File{} = file -> {:ok, file}
       _ -> :file_not_found
     end
   end
@@ -96,7 +96,7 @@ defmodule Tus.Patch do
   end
 
   defp append_data(file, config, data) do
-    case Tus.storage_append(file, config, data) do
+    case Tussle.storage_append(file, config, data) do
       {:ok, file} ->
         new_offset = file.offset + byte_size(data)
         {:ok, file, new_offset}

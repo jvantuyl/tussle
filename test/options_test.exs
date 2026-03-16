@@ -1,11 +1,11 @@
-defmodule Tus.OptionsTest do
+defmodule Tussle.OptionsTest do
   use ExUnit.Case, async: true
   use Plug.Test
-  doctest Tus
+  doctest Tussle
 
   import Plug.Conn.Status, only: [code: 1]
-  import Tus.TestHelpers, only: [test_conn: 2, get_config: 0]
-  alias Tus.TestController
+  import Tussle.TestHelpers, only: [test_conn: 2, get_config: 0]
+  alias Tussle.TestController
 
   setup_all do
     %{config: get_config()}
@@ -17,10 +17,10 @@ defmodule Tus.OptionsTest do
     response = TestController.options(conn)
 
     assert response.status == code(:no_content)
-    assert response |> get_resp_header("tus-resumable") == [Tus.latest_version()]
-    assert response |> get_resp_header("tus-version") == [Tus.str_supported_versions()]
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
+    assert response |> get_resp_header("tus-version") == [Tussle.str_supported_versions()]
     assert response |> get_resp_header("tus-max-size") == ["#{config.max_size}"]
-    assert response |> get_resp_header("tus-extension") == [Tus.extension()]
+    assert response |> get_resp_header("tus-extension") == [Tussle.extension()]
   end
 
   test "unsupported version" do
@@ -33,7 +33,7 @@ defmodule Tus.OptionsTest do
 
     assert response.status == Plug.Conn.Status.code(:precondition_failed)
     assert response |> get_resp_header("tus-resumable") == []
-    assert response |> get_resp_header("tus-version") == [Tus.str_supported_versions()]
+    assert response |> get_resp_header("tus-version") == [Tussle.str_supported_versions()]
     assert response |> get_resp_header("tus-max-size") == []
     assert response |> get_resp_header("tus-extension") == []
   end

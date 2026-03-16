@@ -1,4 +1,4 @@
-defmodule Tus.File do
+defmodule Tussle.File do
   @enforce_keys [:uid]
 
   defstruct uid: nil,

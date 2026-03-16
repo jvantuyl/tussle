@@ -1,9 +1,9 @@
-use Mix.Config
+import Config
 
-config :tus, controllers: [Tus.TestController]
+config :tussle, controllers: [Tussle.TestController]
 
-config :tus, Tus.TestController,
-  storage: Tus.Storage.Local,
+config :tussle, Tussle.TestController,
+  storage: Tussle.Storage.Local,
   base_path: "test/files",
-  cache: Tus.Cache.Memory,
+  cache: Tussle.Cache.Memory,
   max_size: 1024 * 1024 * 10

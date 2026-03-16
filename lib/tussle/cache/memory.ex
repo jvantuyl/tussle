@@ -1,4 +1,4 @@
-defmodule Tus.Cache.Memory do
+defmodule Tussle.Cache.Memory do
   use GenServer
 
   # Public API ----------------------------------------------------------------
@@ -7,7 +7,7 @@ defmodule Tus.Cache.Memory do
     GenServer.start_link(
       __MODULE__,
       [
-        {:ets_table_name, :tus_cache_table},
+        {:ets_table_name, :tussle_cache_table},
         {:log_limit, 1_000_000},
         {:config, config}
       ],
@@ -95,7 +95,7 @@ defmodule Tus.Cache.Memory do
       end
     end)
     |> Enum.each(fn {key, entry} ->
-      case Tus.storage_delete(entry, config) do
+      case Tussle.storage_delete(entry, config) do
         :ok ->
           :ets.delete(ets_table_name, key)
 

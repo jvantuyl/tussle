@@ -1,11 +1,11 @@
-defmodule Tus.PatchTest do
-  use ExUnit.Case, async: true
+defmodule Tussle.PatchTest do
+  use ExUnit.Case, async: false
   use Plug.Test
-  doctest Tus.Patch
+  doctest Tussle.Patch
 
   import Plug.Conn.Status, only: [code: 1]
-  import Tus.TestHelpers, only: [test_conn: 2, test_conn: 4, get_config: 0]
-  alias Tus.TestController
+  import Tussle.TestHelpers, only: [test_conn: 2, test_conn: 4, get_config: 0]
+  alias Tussle.TestController
 
   setup_all do
     %{config: get_config()}
@@ -15,7 +15,7 @@ defmodule Tus.PatchTest do
     conn =
       test_conn(:patch, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-offset", "0"},
           {"content-type", "application/offset+octet-stream"}
         ]
@@ -30,7 +30,7 @@ defmodule Tus.PatchTest do
     uid = "heyyou123"
     offset = 100
 
-    file = %Tus.File{
+    file = %Tussle.File{
       uid: uid,
       offset: 0,
       size: 123_456,
@@ -42,7 +42,7 @@ defmodule Tus.PatchTest do
     conn =
       test_conn(:patch, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-offset", "#{offset + 100}"},
           {"content-type", "application/offset+octet-stream"}
         ]
@@ -56,7 +56,7 @@ defmodule Tus.PatchTest do
     config = context[:config]
     uid = "ihavenocontent"
 
-    file = %Tus.File{
+    file = %Tussle.File{
       uid: uid,
       offset: 0,
       size: 123_456,
@@ -68,7 +68,7 @@ defmodule Tus.PatchTest do
     conn =
       test_conn(:patch, %Plug.Conn{
         req_headers: [
-          {"tus-resumable", Tus.latest_version()},
+          {"tus-resumable", Tussle.latest_version()},
           {"upload-offset", "0"},
           {"content-type", "application/offset+octet-stream"}
         ]
@@ -82,7 +82,7 @@ defmodule Tus.PatchTest do
     config = context[:config]
     uid = "radicalcandor"
 
-    file = %Tus.File{
+    file = %Tussle.File{
       uid: uid,
       offset: 0,
       size: 10,
@@ -96,7 +96,7 @@ defmodule Tus.PatchTest do
         :patch,
         %Plug.Conn{
           req_headers: [
-            {"tus-resumable", Tus.latest_version()},
+            {"tus-resumable", Tussle.latest_version()},
             {"upload-offset", "0"},
             {"content-type", "application/offset+octet-stream"}
           ]
@@ -114,7 +114,7 @@ defmodule Tus.PatchTest do
     uid = "somethingsomething"
     body = "lorem ipsum sit amet 1234567890 this is a test"
 
-    file = %Tus.File{
+    file = %Tussle.File{
       uid: uid,
       offset: 0,
       size: 123_456,
@@ -128,7 +128,7 @@ defmodule Tus.PatchTest do
         :patch,
         %Plug.Conn{
           req_headers: [
-            {"tus-resumable", Tus.latest_version()},
+            {"tus-resumable", Tussle.latest_version()},
             {"upload-offset", "0"},
             {"content-type", "application/offset+octet-stream"}
           ]
@@ -149,7 +149,7 @@ defmodule Tus.PatchTest do
 
     file =
       config.storage.create(
-        %Tus.File{
+        %Tussle.File{
           uid: uid,
           offset: initial_offset,
           size: 123_456
@@ -164,7 +164,7 @@ defmodule Tus.PatchTest do
         :patch,
         %Plug.Conn{
           req_headers: [
-            {"tus-resumable", Tus.latest_version()},
+            {"tus-resumable", Tussle.latest_version()},
             {"upload-offset", "#{initial_offset}"},
             {"content-type", "application/offset+octet-stream"}
           ]
@@ -175,7 +175,7 @@ defmodule Tus.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => uid})
     assert response.status == code(:no_content)
-    assert response |> get_resp_header("tus-resumable") == [Tus.latest_version()]
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
     assert response |> get_resp_header("upload-offset") == ["#{initial_offset + byte_size(body)}"]
 
     # Still exists
@@ -194,7 +194,7 @@ defmodule Tus.PatchTest do
       @custom_offset 25  # Define the offset as a module attribute
       
       def create(file, _config), do: %{file | path: "meh/#{file.uid}"}
-      def append(_file, _config, _data), do: {:ok, %Tus.File{uid: "customoffset", offset: @custom_offset, size: 100, path: "meh/customoffset"}, @custom_offset}
+      def append(_file, _config, _data), do: {:ok, %Tussle.File{uid: "customoffset", offset: @custom_offset, size: 100, path: "meh/customoffset"}, @custom_offset}
       def complete_upload(file, _config), do: {:ok, file}
       def delete(_file, _config), do: :ok
       def file_path(uid, _config), do: "meh/#{uid}"
@@ -209,7 +209,7 @@ defmodule Tus.PatchTest do
     config = Map.put(config, :storage, MockStorage)
 
     file = MockStorage.create(
-      %Tus.File{
+      %Tussle.File{
         uid: uid,
         offset: initial_offset,
         size: 100
@@ -224,7 +224,7 @@ defmodule Tus.PatchTest do
         :patch,
         %Plug.Conn{
           req_headers: [
-            {"tus-resumable", Tus.latest_version()},
+            {"tus-resumable", Tussle.latest_version()},
             {"upload-offset", "#{initial_offset}"},
             {"content-type", "application/offset+octet-stream"}
           ]
@@ -233,12 +233,12 @@ defmodule Tus.PatchTest do
         body
       )
 
-    # Use Tus.Patch directly to bypass controller
+    # Use Tussle.Patch directly to bypass controller
     config = Map.put(config, :uid, uid)
-    config = Map.put(config, :version, Tus.latest_version())
-    response = Tus.Patch.patch(conn, config)
+    config = Map.put(config, :version, Tussle.latest_version())
+    response = Tussle.Patch.patch(conn, config)
     assert response.status == code(:no_content)
-    assert response |> get_resp_header("tus-resumable") == [Tus.latest_version()]
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
     
     # Verify the custom offset is used, not the calculated one
     assert response |> get_resp_header("upload-offset") == ["#{expected_offset}"]
@@ -255,7 +255,7 @@ defmodule Tus.PatchTest do
 
     file =
       config.storage.create(
-        %Tus.File{
+        %Tussle.File{
           uid: uid,
           offset: 0,
           size: byte_size(body)
@@ -270,7 +270,7 @@ defmodule Tus.PatchTest do
         :patch,
         %Plug.Conn{
           req_headers: [
-            {"tus-resumable", Tus.latest_version()},
+            {"tus-resumable", Tussle.latest_version()},
             {"upload-offset", "0"},
             {"content-type", "application/offset+octet-stream"}
           ]
@@ -281,7 +281,7 @@ defmodule Tus.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => uid})
     assert response.status == code(:no_content)
-    assert response |> get_resp_header("tus-resumable") == [Tus.latest_version()]
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
     assert response |> get_resp_header("upload-offset") == ["#{byte_size(body)}"]
 
     # https://dockyard.com/blog/2016/03/24/testing-function-delegation-in-elixir-without-stubbing
@@ -293,20 +293,20 @@ defmodule Tus.PatchTest do
 
   test "with expiration protocol enabled", context do
     config = context[:config]
-    app_env = Application.get_env(:tus, Tus.TestController, [])
+    app_env = Application.get_env(:tussle, Tussle.TestController, [])
 
     new_app_env =
       app_env
       |> Keyword.update(:expiration_period, 300, fn _ -> 300 end)
 
-    Application.put_env(:tus, Tus.TestController, new_app_env)
+    Application.put_env(:tussle, Tussle.TestController, new_app_env)
 
     uid = "youcompleteme"
     body = "lorem ipsum sit amet 1234567890 this is a test"
 
     file =
       config.storage.create(
-        %Tus.File{
+        %Tussle.File{
           uid: uid,
           offset: 0,
           created_at: DateTime.to_unix(DateTime.utc_now()),
@@ -322,7 +322,7 @@ defmodule Tus.PatchTest do
         :patch,
         %Plug.Conn{
           req_headers: [
-            {"tus-resumable", Tus.latest_version()},
+            {"tus-resumable", Tussle.latest_version()},
             {"upload-offset", "0"},
             {"content-type", "application/offset+octet-stream"}
           ]
@@ -333,13 +333,13 @@ defmodule Tus.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => uid})
     assert response.status == code(:no_content)
-    assert response |> get_resp_header("tus-resumable") == [Tus.latest_version()]
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
     assert response |> get_resp_header("upload-offset") == ["#{byte_size(body)}"]
     [expire_at] = response |> get_resp_header("upload-expires")
     assert is_binary(expire_at)
 
     on_exit(fn ->
-      Application.put_env(:tus, Tus.TestController, app_env)
+      Application.put_env(:tussle, Tussle.TestController, app_env)
     end)
   end
 end

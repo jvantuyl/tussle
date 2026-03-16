@@ -1,12 +1,12 @@
-defmodule Tus.Delete do
+defmodule Tussle.Delete do
   @moduledoc """
   """
   import Plug.Conn
 
   def delete(conn, %{version: version} = config) when version == "1.0.0" do
-    with {:ok, %Tus.File{} = file} <- get_file(config) do
-      Tus.storage_delete(file, config)
-      Tus.cache_delete(file, config)
+    with {:ok, %Tussle.File{} = file} <- get_file(config) do
+      Tussle.storage_delete(file, config)
+      Tussle.cache_delete(file, config)
 
       conn
       |> put_resp_header("tus-resumable", config.version)
@@ -20,8 +20,8 @@ defmodule Tus.Delete do
   end
 
   defp get_file(config) do
-    case Tus.cache_get(config) do
-      %Tus.File{} = file -> {:ok, file}
+    case Tussle.cache_get(config) do
+      %Tussle.File{} = file -> {:ok, file}
       _ -> :file_not_found
     end
   end

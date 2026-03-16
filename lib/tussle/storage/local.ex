@@ -1,7 +1,7 @@
-defmodule Tus.Storage.Local do
+defmodule Tussle.Storage.Local do
   @default_base_path "priv/static/files/"
 
-  @behaviour Tus.Storage
+  @behaviour Tussle.Storage
 
   def get_path(uid) do
     uid
@@ -33,7 +33,8 @@ defmodule Tus.Storage.Local do
 
     path = path |> Path.join(file.uid)
 
-    %Tus.File{file | path: path}
+    %Tussle.File{} = file
+    %{file | path: path}
   end
 
   def append(file, config, body) do

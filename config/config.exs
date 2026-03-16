@@ -1,6 +1,4 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
-use Mix.Config
+import Config
 
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this
@@ -10,18 +8,18 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :tus, key: :value
+#     config :tussle, key: :value
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:tus, :key)
+#     Application.get_env(:tussle, :key)
 #
 # You can also configure a 3rd-party app:
 #
 #     config :logger, level: :info
 #
 
-config :tus, controllers: []
+config :tussle, controllers: []
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment

@@ -1,26 +1,25 @@
-defmodule Tus.MixProject do
+defmodule Tussle.MixProject do
   use Mix.Project
 
   @version File.read!("VERSION") |> String.trim()
-  @source_url "https://github.com/gottfrois/tus"
+  @source_url "https://github.com/jvantuyl/tussle"
 
   def project do
     [
-      app: :tus,
+      app: :tussle,
       version: @version,
-      elixir: "~> 1.11",
+      elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
-      description: "An Elixir sever for the resumable upload protocol “tus”",
+      description: "An Elixir server for the resumable upload protocol \"tus\" - maintained fork of the tus package",
       deps: deps(),
       docs: docs(),
-      package: package(),
-      dialyzer: [ignore_warnings: "dialyzer.ignore-warnings"]
+      package: package()
     ]
   end
 
   defp docs do
     [
-      main: "Tus",
+      main: "Tussle",
       source_url: @source_url,
       extras: []
     ]
@@ -29,9 +28,9 @@ defmodule Tus.MixProject do
   def package() do
     [
       files: ~w(lib mix.exs README.md LICENSE VERSION),
-      licenses: ["BSD 3-Clause License"],
-      maintainers: ["Juan-Pablo Scaletti", "juanpablo@jpscaletti.com"],
-      links: %{"GitHub" => @source_url}
+      licenses: ["BSD-3-Clause"],
+      maintainers: ["Jayson Vantuyl"],
+      links: %{"GitHub" => @source_url, "original package" => "https://hex.pm/packages/tus"}
     ]
   end
 
@@ -39,7 +38,7 @@ defmodule Tus.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Tus.Application, []}
+      mod: {Tussle.Application, []}
     ]
   end
 
