@@ -1,5 +1,9 @@
 # Tussle
 
+[![Tests](https://github.com/jvantuyl/tussle/actions/workflows/main.yml/badge.svg)](https://github.com/jvantuyl/tussle/actions/workflows/main.yml)
+[![Hex.pm](https://img.shields.io/hexpm/v/tussle.svg)](https://hex.pm/packages/tussle)
+[![HexDocs](https://img.shields.io/badge/hex-docs-blue)](https://hexdocs.pm/tussle/)
+
 An implementation of a *[tus](https://tus.io/)* **server** in Elixir
 
 **Documentation: https://hexdocs.pm/tussle/**
