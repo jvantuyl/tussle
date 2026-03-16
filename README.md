@@ -102,13 +102,9 @@ config :tussle, DemoWeb.UploadController,
 
 - `base_path`: where in the filesystem the uploaded files will be stored
 
-## Attribution
-
-This is a maintained fork of the original [`tus`](https://hex.pm/packages/tus) package by Juan-Pablo Scaletti.
-
 ## Acknowledgments
 
-Thank you to all the contributors who have helped improve this library:
+Thank you to the original author of this library and all the people who graciously published their improvements that I have integrated into this fork.
 
 - **Juan-Pablo Scaletti** ([jpscaletti](https://github.com/jpsca)) -- original author
 - **Pierre-Louis Gottfrois** ([gottfrois](https://github.com/gottfrois)) -- maintained the primary fork, merged community PRs
@@ -120,6 +116,24 @@ Thank you to all the contributors who have helped improve this library:
 - **Ringo De Smet** ([ringods](https://github.com/ringods)) -- Storage behaviour, File typespecs, metadata as map
 - **Alexander Buch** ([bucha](https://github.com/bucha)) -- multiple cache support
 - **Joel Jucá** ([joeljuca](https://github.com/joeljuca)) -- mix.exs formatting fix
+
+## Contributors
+
+<!-- readme: jvantuyl,collaborators,contributors,sponsors,bots/- -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/jvantuyl">
+                    <img src="https://avatars.githubusercontent.com/u/101?v=4" width="100;" alt="jvantuyl"/>
+                    <br />
+                    <sub><b>Jayson Vantuyl</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
+<!-- readme: jvantuyl,collaborators,contributors,sponsors,bots/- -end -->
 
 ## License
 
