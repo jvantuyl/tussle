@@ -1,6 +1,8 @@
 defmodule Tus.Storage.Local do
   @default_base_path "priv/static/files/"
 
+  @behaviour Tus.Storage
+
   def get_path(uid) do
     uid
     |> String.split("")
@@ -14,7 +16,7 @@ defmodule Tus.Storage.Local do
     |> Path.expand()
   end
 
-  def make_basepath(path, config) do
+  defp make_basepath(path, config) do
     basepath = Path.join([base_path(config), path])
     File.mkdir_p!(basepath)
     basepath
