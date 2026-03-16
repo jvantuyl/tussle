@@ -130,6 +130,57 @@ Thank you to the original author of this library and all the people who gracious
                     <sub><b>Jayson Vantuyl</b></sub>
                 </a>
             </td>
+            <td align="center">
+                <a href="https://github.com/jpsca">
+                    <img src="https://avatars.githubusercontent.com/u/67524204?v=4" width="100;" alt="jpsca"/>
+                    <br />
+                    <sub><b>Juan-Pablo Scaletti</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/gottfrois">
+                    <img src="https://avatars.githubusercontent.com/u/943784?v=4" width="100;" alt="gottfrois"/>
+                    <br />
+                    <sub><b>Pierre-Louis Gottfrois</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/marcinkoziej">
+                    <img src="https://avatars.githubusercontent.com/u/156725?v=4" width="100;" alt="marcinkoziej"/>
+                    <br />
+                    <sub><b>Marcin Koziej</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/ringods">
+                    <img src="https://avatars.githubusercontent.com/u/77923?v=4" width="100;" alt="ringods"/>
+                    <br />
+                    <sub><b>Ringo De Smet</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/joeljuca">
+                    <img src="https://avatars.githubusercontent.com/u/673884?v=4" width="100;" alt="joeljuca"/>
+                    <br />
+                    <sub><b>Joel Jucá</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/feng19">
+                    <img src="https://avatars.githubusercontent.com/u/2451508?v=4" width="100;" alt="feng19"/>
+                    <br />
+                    <sub><b>Kevin Pan</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/zkessin">
+                    <img src="https://avatars.githubusercontent.com/u/1738082?v=4" width="100;" alt="zkessin"/>
+                    <br />
+                    <sub><b>Zachary Kessin</b></sub>
+                </a>
+            </td>
 		</tr>
 	<tbody>
 </table>
