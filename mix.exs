@@ -10,31 +10,15 @@ defmodule Tussle.MixProject do
       version: @version,
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
-      description: "An Elixir server for the resumable upload protocol \"tus\" - maintained fork of the tus package",
       deps: deps(),
-      docs: docs(),
-      package: package()
-    ]
-  end
-
-  defp docs do
-    [
-      main: "Tussle",
+      name: "Tussle",
+      description: "An Elixir server for the resumable upload protocol \"tus\" - maintained fork of the tus package",
       source_url: @source_url,
-      extras: []
+      package: package(),
+      docs: docs()
     ]
   end
 
-  def package() do
-    [
-      files: ~w(lib mix.exs README.md LICENSE VERSION),
-      licenses: ["BSD-3-Clause"],
-      maintainers: ["Jayson Vantuyl"],
-      links: %{"GitHub" => @source_url, "original package" => "https://hex.pm/packages/tus"}
-    ]
-  end
-
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger],
@@ -42,12 +26,36 @@ defmodule Tussle.MixProject do
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:plug, "~> 1.3"},
       {:uuid, "~> 1.1"},
-      {:ex_doc, ">= 0.0.0", only: :dev}
+      {:ex_doc, "~> 0.23", only: :dev, runtime: false}
+    ]
+  end
+
+  defp package do
+    [
+      files: ~w(lib mix.exs README.md LICENSE VERSION),
+      licenses: ["BSD-3-Clause"],
+      links: %{
+        "GitHub" => @source_url,
+        "Original package" => "https://hex.pm/packages/tus"
+      }
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      api_reference: false,
+      extras: [
+        "README.md": [title: "Overview"],
+        "LICENSE": [title: "License"],
+        "CHANGELOG.md": [title: "Changelog"]
+      ],
+      authors: ["Jayson Vantuyl"],
+      source_ref: "v#{@version}"
     ]
   end
 end
