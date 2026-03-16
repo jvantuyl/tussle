@@ -64,7 +64,7 @@ jobs:
         runs-on: ubuntu-latest
         name: A job to automate contrib in readme
         needs: test
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'contrib-readme-action')
         permissions:
           contents: write
           pull-requests: write
