@@ -11,6 +11,10 @@ An implementation of a *[tus](https://tus.io/)* **server** in Elixir
 > An interruption may happen willingly, if the user wants to pause,
 > or by accident in case of an network issue or server outage.
 
+## About This Fork
+
+This is a maintained fork of the original [`tus`](https://hex.pm/packages/tus) package. The package was renamed to **Tussle** to allow publishing updated versions to Hex without conflicting with the original (now unmaintained) package.
+
 It's currently capable of accepting uploads with arbitrary sizes and storing them locally
 on disk; or in Amazon S3, by installing the [`tus_storage_s3`](https://hex.pm/packages/tus_storage_s3) hex package.
 Due to its modularization and extensibility, support for any other cloud provider can be easily added.
