@@ -58,15 +58,37 @@ defmodule Tussle do
 
   **2. Add routes for each of your upload controllers**
 
+  The simplest way is to use the `Tussle.Routes` macro in your router:
+
+  ```elixir
+  defmodule DemoWeb.Router do
+    use DemoWeb, :router
+    import Tussle.Routes
+
+    scope "/files", DemoWeb do
+      pipe_through :api
+      add_tus_routes UploadController
+    end
+  end
+  ```
+
+  Or define routes manually:
+
   ```elixir
   scope "/files", DemoWeb do
       options "/",          UploadController, :options
-      match :head, "/:uid", UploadController, :head
       post "/",             UploadController, :post
+      match :head, "/:uid", UploadController, :head
+      get "/:uid",          UploadController, :get  # CloudFlare compatibility
       patch "/:uid",        UploadController, :patch
       delete "/:uid",       UploadController, :delete
   end
   ```
+
+  > **⚠️ CloudFlare Note**: CloudFlare's caching layer converts HEAD requests to GET,
+  > which unexpectedly violates the expectations of the TUS protocol. The `get/:uid`
+  > route above mirrors HEAD behavior to restore compatibility. See `Tussle.get/2`
+  > and `Tussle.Routes` for details.
 
   **3. Add config for each controller (see next section)**
 
@@ -146,6 +168,50 @@ defmodule Tussle do
   end
 
   def head(conn, _config) do
+    unsupported_version(conn)
+  end
+
+  @doc """
+  Handles GET requests for upload metadata.
+
+  This is **not** part of the TUS specification, which only defines HEAD for
+  retrieving upload metadata. However, some CDN/proxy configurations (most notably
+  CloudFlare) convert HEAD requests to GET requests, which unexpectedly violates
+  the expectations of the TUS protocol.
+
+  This function delegates to `head/2` and returns the same headers (`Upload-Offset`,
+  `Upload-Length`, etc.) with an empty body, making it functionally equivalent to
+  HEAD for clients.
+
+  ## Why This Exists
+
+  > **⚠️ CloudFlare Compatibility Note**
+  >
+  > CloudFlare's caching layer converts HEAD requests to GET requests.
+  > The TUS protocol specifies HEAD for metadata retrieval, so this conversion
+  > can cause requests to not match HEAD routes, resulting in 404 errors.
+  > Adding a GET route that mirrors HEAD behavior restores compatibility.
+  >
+  > If you're using CloudFlare or similar CDNs with TUS, add both HEAD and GET
+  > routes, or use `Tussle.Routes.add_tus_routes/1` which includes both automatically.
+
+  ## Example Routes
+
+      scope "/files", DemoWeb do
+          options "/",          UploadController, :options
+          post "/",             UploadController, :post
+          match :head, "/:uid", UploadController, :head
+          get "/:uid",          UploadController, :get  # CloudFlare compatibility
+          patch "/:uid",        UploadController, :patch
+          delete "/:uid",       UploadController, :delete
+      end
+
+  """
+  def get(conn, %{version: version} = config) when version in @supported_versions do
+    Tussle.Head.head(conn, config)
+  end
+
+  def get(conn, _config) do
     unsupported_version(conn)
   end
 

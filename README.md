@@ -65,15 +65,42 @@ end
 
 **2. Add routes for each of your upload controllers**
 
+The simplest way is to use the `Tussle.Routes` macro:
+
+```elixir
+defmodule DemoWeb.Router do
+  use DemoWeb, :router
+  import Tussle.Routes
+
+  scope "/files", DemoWeb do
+    pipe_through :api
+    add_tus_routes UploadController
+  end
+end
+```
+
+Or define routes manually:
+
 ```elixir
 scope "/files", DemoWeb do
     options "/",          UploadController, :options
-    match :head, "/:uid", UploadController, :head
     post "/",             UploadController, :post
+    match :head, "/:uid", UploadController, :head
+    get "/:uid",          UploadController, :get  # CloudFlare compatibility
     patch "/:uid",        UploadController, :patch
     delete "/:uid",       UploadController, :delete
 end
 ```
+
+> **⚠️ CloudFlare Compatibility Note**
+>
+> CloudFlare's caching layer converts HEAD requests to GET requests.
+> The TUS protocol specifies HEAD for metadata retrieval, so this conversion
+> can cause requests to not match HEAD routes, resulting in 404 errors.
+>
+> The `add_tus_routes/1` macro includes a GET route that mirrors HEAD behavior
+> automatically. If you define routes manually, you must add the GET route yourself
+> to ensure resumable uploads work correctly behind CloudFlare or similar CDNs.
 
 **3. Add config for each controller (see next section)**
 

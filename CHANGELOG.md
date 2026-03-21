@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.3.0
+
+### CloudFlare HEAD-to-GET Compatibility
+
+Added support for CDNs (notably CloudFlare) that convert HEAD requests to GET requests.
+
+- Added `Tussle.get/2` function that mirrors `Tussle.head/2` behavior
+- Added `Tussle.Routes` module with `add_tus_routes/1` macro for easy route setup
+- Updated controller to include `get/2` action
+- Fixed `read_body/2` to properly accumulate chunked request bodies in PATCH handler
+- Added `CDN-Cache-Control: no-store` header to HEAD/GET responses
+
+**Why this matters:** CloudFlare's caching layer converts HEAD requests to GET,
+which unexpectedly violates the expectations of the TUS protocol. The new GET
+route and `add_tus_routes` macro restore compatibility.
+
+### Usage
+
+```elixir
+# In your router:
+import Tussle.Routes
+
+scope "/files", MyAppWeb do
+  pipe_through :api
+  add_tus_routes UploadController
+end
+```
+
 ## v0.2.0
 
 Fork of the original [`tus`](https://hex.pm/packages/tus) package, renamed to Tussle.

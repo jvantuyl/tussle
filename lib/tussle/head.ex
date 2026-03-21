@@ -9,7 +9,9 @@ defmodule Tussle.Head do
         |> put_resp_header("tus-resumable", config.version)
         # The Server MUST prevent the client and/or proxies from caching the response
         # by adding the Cache-Control: no-store header to the response.
-        |> put_resp_header("cache-control", "no-store"),
+        # CDN-Cache-Control is also set for CDNs like CloudFlare that may need explicit instruction.
+        |> put_resp_header("cache-control", "no-store")
+        |> put_resp_header("cdn-cache-control", "no-store"),
 
         Tussle.cache_get(config)
     )

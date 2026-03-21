@@ -81,9 +81,27 @@ defmodule Tussle.Patch do
   end
 
   defp get_body(conn) do
-    case read_body(conn) do
-      {_, binary, conn} -> {:ok, binary, conn}
-      _ -> :no_body
+    # Read the full body by accumulating chunks until we get :ok
+    # read_body may return :more for chunked/streamed bodies
+    read_all_body(conn, [])
+  end
+
+  defp read_all_body(conn, acc) do
+    case read_body(conn, length: 100_000_000) do
+      {:ok, binary, conn} ->
+        # Final chunk received - combine all parts
+        body = acc |> Enum.reverse() |> Enum.join() |> Kernel.<>(binary)
+        {:ok, body, conn}
+
+      {:more, binary, conn} ->
+        # More chunks to come - accumulate this one and continue
+        read_all_body(conn, [binary | acc])
+
+      {:error, _reason} ->
+        :no_body
+
+      _ ->
+        :no_body
     end
   end
 

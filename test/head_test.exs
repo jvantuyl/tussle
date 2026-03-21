@@ -33,6 +33,9 @@ defmodule Tussle.HeadTest do
     assert response |> get_resp_header("upload-offset") == ["#{file.offset}"]
     assert response |> get_resp_header("upload-length") == ["#{file.size}"]
     assert response |> get_resp_header("upload-defer-length") == []
+    # TUS spec requires no-store to prevent caching
+    assert response |> get_resp_header("cache-control") == ["no-store"]
+    assert response |> get_resp_header("cdn-cache-control") == ["no-store"]
   end
 
   test "HEAD: If the resource is not found, the Server SHOULD return a 404 and no Upload-Offset header" do

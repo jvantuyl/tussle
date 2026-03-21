@@ -11,6 +11,10 @@ defmodule Tussle.Controller do
         call_method(conn, config |> Map.put(:uid, uid))
       end
 
+      def get(conn, %{"uid" => uid} = config) do
+        call_method(conn, config |> Map.put(:uid, uid))
+      end
+
       def post(conn, config \\ %{}) do
         call_method(conn)
       end
