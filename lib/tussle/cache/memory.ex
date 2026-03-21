@@ -73,26 +73,22 @@ defmodule Tussle.Cache.Memory do
   defp maybe_add_expiration_timer(nil), do: nil
 
   defp maybe_add_expiration_timer(ttl) do
-    period = ttl * 1_000
-    Process.send_after(self(), {:expire_timer, new_expire_time(period)}, period)
-  end
-
-  defp new_expire_time(period) do
-    now = DateTime.to_unix(DateTime.utc_now())
-    now + period
+    # ttl is in seconds, convert to milliseconds for timer
+    period_ms = ttl * 1_000
+    # Store expiration time as unix timestamp in seconds
+    expires_at = DateTime.to_unix(DateTime.utc_now()) + ttl
+    Process.send_after(self(), {:expire_timer, expires_at}, period_ms)
   end
 
   defp expire_entries(ets_table_name, now, config) do
+    expiration_period = Map.get(config, :expiration_period, 86_400)
+
     ets_table_name
     |> :ets.tab2list()
     |> Enum.filter(fn {_k, entry} ->
-      diff_time = now - entry.created_at
-
-      diff_time
-      |> case do
-        v when v > 0 -> true
-        _ -> false
-      end
+      # now and created_at are both unix timestamps in seconds
+      age = now - entry.created_at
+      age > expiration_period
     end)
     |> Enum.each(fn {key, entry} ->
       case Tussle.storage_delete(entry, config) do
