@@ -2,6 +2,12 @@ defmodule Tussle.Patch do
   @moduledoc """
   """
   import Plug.Conn
+  require Logger
+
+  # Configurable read_body options with defaults
+  @read_body_length Application.compile_env(:tussle, :read_body_length, 100_000_000)
+  @read_body_read_length Application.compile_env(:tussle, :read_body_read_length, 262_144)
+  @read_body_timeout Application.compile_env(:tussle, :read_body_timeout, 30_000)
 
   def patch(conn, %{version: version} = config) when version == "1.0.0" do
     with {:ok, %Tussle.File{} = file} <- get_file(config),
@@ -13,7 +19,7 @@ defmodule Tussle.Patch do
          {:ok, file} <- maybe_upload_completed(file, new_offset, config) do
       conn
       |> put_resp_header("tus-resumable", config.version)
-      |> put_resp_header("upload-offset", "#{file.offset}")
+      |> put_resp_header("upload-offset", "#{new_offset}")
       |> Tussle.add_expire_hdr(file, config)
       |> resp(:no_content, "")
     else
@@ -29,7 +35,8 @@ defmodule Tussle.Patch do
       :too_large ->
         conn |> resp(:request_entity_too_large, "Data is larger than expected")
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.error("Tussle PATCH failed: #{inspect(reason)}")
         conn |> resp(:bad_request, "Unable to save file")
 
       :too_small ->
@@ -87,20 +94,24 @@ defmodule Tussle.Patch do
   end
 
   defp read_all_body(conn, acc) do
-    case read_body(conn, length: 100_000_000) do
+    case read_body(conn,
+           length: @read_body_length,
+           read_length: @read_body_read_length,
+           timeout: @read_body_timeout
+         ) do
       {:ok, binary, conn} ->
-        # Final chunk received - combine all parts
         body = acc |> Enum.reverse() |> Enum.join() |> Kernel.<>(binary)
         {:ok, body, conn}
 
       {:more, binary, conn} ->
-        # More chunks to come - accumulate this one and continue
         read_all_body(conn, [binary | acc])
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.error("Tussle read_body error: #{inspect(reason)}")
         :no_body
 
-      _ ->
+      other ->
+        Logger.warning("Tussle read_body unexpected: #{inspect(other)}")
         :no_body
     end
   end

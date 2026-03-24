@@ -6,14 +6,13 @@ defmodule Tussle.Head do
   def head(conn, %{version: version} = config) when version == "1.0.0" do
     response(
       conn
-        |> put_resp_header("tus-resumable", config.version)
-        # The Server MUST prevent the client and/or proxies from caching the response
-        # by adding the Cache-Control: no-store header to the response.
-        # CDN-Cache-Control is also set for CDNs like CloudFlare that may need explicit instruction.
-        |> put_resp_header("cache-control", "no-store")
-        |> put_resp_header("cdn-cache-control", "no-store"),
-
-        Tussle.cache_get(config)
+      |> put_resp_header("tus-resumable", config.version)
+      # The Server MUST prevent the client and/or proxies from caching the response
+      # by adding the Cache-Control: no-store header to the response.
+      # CDN-Cache-Control is also set for CDNs like CloudFlare that may need explicit instruction.
+      |> put_resp_header("cache-control", "no-store")
+      |> put_resp_header("cdn-cache-control", "no-store"),
+      Tussle.cache_get(config)
     )
   end
 

@@ -187,19 +187,31 @@ defmodule Tussle.PatchTest do
     uid = "customoffset"
     body = "lorem ipsum sit amet 1234567890 this is a test"
     initial_offset = 10
-    expected_offset = 25  # Different from initial_offset + byte_size(body)
+    # Different from initial_offset + byte_size(body)
+    expected_offset = 25
 
     # Create a mock storage module that returns a custom offset
     defmodule MockStorage do
-      @custom_offset 25  # Define the offset as a module attribute
-      
+      # Define the offset as a module attribute
+      @custom_offset 25
+
       def create(file, _config), do: %{file | path: "meh/#{file.uid}"}
-      def append(_file, _config, _data), do: {:ok, %Tussle.File{uid: "customoffset", offset: @custom_offset, size: 100, path: "meh/customoffset"}, @custom_offset}
+
+      def append(_file, _config, _data),
+        do:
+          {:ok,
+           %Tussle.File{
+             uid: "customoffset",
+             offset: @custom_offset,
+             size: 100,
+             path: "meh/customoffset"
+           }, @custom_offset}
+
       def complete_upload(file, _config), do: {:ok, file}
       def delete(_file, _config), do: :ok
       def file_path(uid, _config), do: "meh/#{uid}"
       def url(uid, _config), do: "http://example.com/#{uid}"
-      
+
       # Add these methods to handle any other operations that might be called
       def base_path(_config), do: ""
       def local_path(path, _config), do: path
@@ -208,14 +220,15 @@ defmodule Tussle.PatchTest do
     # Override the storage in config
     config = Map.put(config, :storage, MockStorage)
 
-    file = MockStorage.create(
-      %Tussle.File{
-        uid: uid,
-        offset: initial_offset,
-        size: 100
-      },
-      config
-    )
+    file =
+      MockStorage.create(
+        %Tussle.File{
+          uid: uid,
+          offset: initial_offset,
+          size: 100
+        },
+        config
+      )
 
     config.cache.put(config.cache_name, uid, file)
 
@@ -239,10 +252,10 @@ defmodule Tussle.PatchTest do
     response = Tussle.Patch.patch(conn, config)
     assert response.status == code(:no_content)
     assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
-    
+
     # Verify the custom offset is used, not the calculated one
     assert response |> get_resp_header("upload-offset") == ["#{expected_offset}"]
-    
+
     # Verify the file in cache has the custom offset
     cached_file = config.cache.get(config.cache_name, uid)
     assert cached_file.offset == expected_offset

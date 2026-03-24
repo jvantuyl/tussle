@@ -9,6 +9,7 @@ defmodule Tussle.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Tussle.Supervisor]
+
     case get_children() do
       {:error, _} = e -> e
       children when is_list(children) -> Supervisor.start_link(children, opts)
@@ -21,16 +22,18 @@ defmodule Tussle.Application do
       case Application.get_env(:tussle, controller) do
         worker_opts when is_list(worker_opts) ->
           {:cont, [start_worker(controller, worker_opts) | lst]}
+
         nil ->
-            {:halt, {:error, "Tussle configuration for #{controller} not found"}}
+          {:halt, {:error, "Tussle configuration for #{controller} not found"}}
       end
     end)
   end
 
   defp start_worker(controller, opts) do
-    config = opts
-    |> Enum.into(%{})
-    |> Map.put(:cache_name, Module.concat(controller, TussleCache))
+    config =
+      opts
+      |> Enum.into(%{})
+      |> Map.put(:cache_name, Module.concat(controller, TussleCache))
 
     # Modern child spec format (replaces deprecated Supervisor.Spec.worker/3)
     %{

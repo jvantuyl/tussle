@@ -12,7 +12,8 @@ defmodule Tussle.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       name: "Tussle",
-      description: "An Elixir server for the resumable upload protocol \"tus\" - maintained fork of the tus package",
+      description:
+        "An Elixir server for the resumable upload protocol \"tus\" - maintained fork of the tus package",
       source_url: @source_url,
       package: package(),
       docs: docs()
@@ -51,7 +52,7 @@ defmodule Tussle.MixProject do
       api_reference: false,
       extras: [
         "README.md": [title: "Overview"],
-        "LICENSE": [title: "License"],
+        LICENSE: [title: "License"],
         "CHANGELOG.md": [title: "Changelog"]
       ],
       authors: ["Jayson Vantuyl"],

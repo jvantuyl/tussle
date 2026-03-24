@@ -59,12 +59,12 @@ defmodule Tussle.Routes do
 
   defmacro add_tus_routes(controller) do
     quote do
-      options "/", unquote(controller), :options
-      post "/", unquote(controller), :post
-      match :head, "/:uid", unquote(controller), :head
-      get "/:uid", unquote(controller), :get
-      patch "/:uid", unquote(controller), :patch
-      delete "/:uid", unquote(controller), :delete
+      options("/", unquote(controller), :options)
+      post("/", unquote(controller), :post)
+      match(:head, "/:uid", unquote(controller), :head)
+      get("/:uid", unquote(controller), :get)
+      patch("/:uid", unquote(controller), :patch)
+      delete("/:uid", unquote(controller), :delete)
     end
   end
 end

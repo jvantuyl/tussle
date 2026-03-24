@@ -2,17 +2,17 @@ defmodule Tussle.TestController do
   use Tussle.Controller
 
   def init_file(file, conn) do
-    send self(), {:init_file, conn}
+    send(self(), {:init_file, conn})
     file
   end
 
   def on_begin_upload(_file) do
-    send self(), :on_begin_upload_called
+    send(self(), :on_begin_upload_called)
     :ok
   end
 
   def on_complete_upload(_file) do
-    send self(), :on_complete_upload_called
+    send(self(), :on_complete_upload_called)
     :ok
   end
 end
@@ -30,7 +30,7 @@ defmodule Tussle.TestHelpers do
   def get_config do
     Application.get_env(:tussle, Tussle.TestController)
     |> Enum.into(%{})
-    |> Map.put(:cache_name,  Module.concat(Tussle.TestController, TussleCache))
+    |> Map.put(:cache_name, Module.concat(Tussle.TestController, TussleCache))
   end
 end
 

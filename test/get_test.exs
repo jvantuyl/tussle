@@ -58,12 +58,14 @@ defmodule Tussle.GetTest do
     test "GET: includes Upload-Metadata header when present", context do
       config = context[:config]
       uid = "metadata-test"
+
       file = %Tussle.File{
         uid: uid,
         offset: 0,
         size: 1000,
         metadata_src: "filename dGVzdC50eHQ=,type dGV4dC9wbGFpbg=="
       }
+
       config.cache.put(config.cache_name, uid, file)
 
       conn =

@@ -35,6 +35,7 @@ defmodule Tussle.DeleteTest do
       size: 123,
       path: "meh/#{uid}"
     }
+
     config.cache.put(config.cache_name, uid, file)
 
     conn =
@@ -51,7 +52,6 @@ defmodule Tussle.DeleteTest do
     assert is_nil(config.cache.get(config.cache_name, uid))
   end
 
-
   test "delete file", context do
     config = context[:config]
     uid = "goodbyecruelworld"
@@ -61,10 +61,11 @@ defmodule Tussle.DeleteTest do
         %Tussle.File{
           uid: uid,
           offset: 0,
-          size: 123,
+          size: 123
         },
         config
       )
+
     config.cache.put(config.cache_name, uid, file)
     assert File.exists?(Path.join(config.base_path, file.path))
 

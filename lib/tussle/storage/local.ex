@@ -1,5 +1,6 @@
 defmodule Tussle.Storage.Local do
   @default_base_path "priv/static/files/"
+  require Logger
 
   @behaviour Tussle.Storage
 
@@ -38,16 +39,18 @@ defmodule Tussle.Storage.Local do
   end
 
   def append(file, config, body) do
-    base_path(config)
-    |> Path.join(file.path)
+    path = base_path(config) |> Path.join(file.path)
+
+    path
     |> File.open([:append, :binary, :delayed_write, :raw])
     |> case do
       {:ok, filesto} ->
         IO.binwrite(filesto, body)
-        File.close(filesto)
+        :ok = File.close(filesto)
         {:ok, file}
 
       {:error, error} ->
+        Logger.error("Tussle.Storage.Local append failed: #{inspect(error)}")
         {:error, error}
     end
   end
