@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.3.1
+
+### Bug Fixes
+
+- **Fixed upload-offset header**: Previously returned the old `file.offset` instead of `new_offset` after appending data, causing clients to retry uploading the same chunk repeatedly.
+
+### Improvements
+
+- **Configurable read_body options**: Added application config options for tuning request body reading:
+  - `read_body_length` - max body size (default: 100MB)
+  - `read_body_read_length` - chunk size for throughput (default: 256KB)
+  - `read_body_timeout` - timeout per read (default: 30s)
+
+- **Error logging**: Added `Logger.error` calls for failed operations to aid debugging.
+
 ## v0.3.0
 
 ### CloudFlare HEAD-to-GET Compatibility
