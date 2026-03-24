@@ -135,6 +135,21 @@ config :tussle, DemoWeb.UploadController,
 
 - `base_path`: where in the filesystem the uploaded files will be stored
 
+### Read Body Options
+
+These options control how the server reads upload request bodies:
+
+```elixir
+config :tussle,
+  read_body_length: 100_000_000,      # max body size in bytes (default: 100MB)
+  read_body_read_length: 262_144,     # chunk size for reading (default: 256KB)
+  read_body_timeout: 30_000            # timeout per read in ms (default: 30s)
+```
+
+- `read_body_length`: Maximum allowed request body size. Increase for very large file uploads.
+- `read_body_read_length`: Size of chunks read from the socket. Larger values improve throughput for big files but use more memory per read.
+- `read_body_timeout`: Maximum time to wait for each chunk. Increase for slow clients or unreliable networks.
+
 ## About This Fork
 
 This is a maintained fork of the original [`tus`](https://hex.pm/packages/tus) package. The package was renamed to **Tussle** to allow publishing updated versions to Hex without conflicting with the original (now unmaintained) package.
