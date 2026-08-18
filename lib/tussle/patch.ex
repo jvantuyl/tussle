@@ -94,27 +94,39 @@ defmodule Tussle.Patch do
   end
 
   defp read_all_body(conn, acc) do
-    case read_body(conn,
-           length: @read_body_length,
-           read_length: @read_body_read_length,
-           timeout: @read_body_timeout
-         ) do
-      {:ok, binary, conn} ->
-        body = acc |> Enum.reverse() |> Enum.join() |> Kernel.<>(binary)
-        {:ok, body, conn}
-
-      {:more, binary, conn} ->
-        read_all_body(conn, [binary | acc])
-
-      {:error, reason} ->
-        Logger.error("Tussle read_body error: #{inspect(reason)}")
-        :no_body
-
-      other ->
-        Logger.warning("Tussle read_body unexpected: #{inspect(other)}")
-        :no_body
-    end
+    conn
+    |> read_body(
+      length: @read_body_length,
+      read_length: @read_body_read_length,
+      timeout: @read_body_timeout
+    )
+    |> handle_read_body_result(conn, acc)
   end
+
+  defp handle_read_body_result({:ok, binary, conn}, _original_conn, acc) do
+    body = acc |> Enum.reverse() |> Enum.join() |> Kernel.<>(binary)
+    {:ok, body, conn}
+  end
+
+  defp handle_read_body_result({:more, binary, conn}, _original_conn, acc) do
+    read_all_body(conn, [binary | acc])
+  end
+
+  defp handle_read_body_result({:error, reason}, _conn, _acc) do
+    Logger.error("Tussle read_body error: #{inspect(reason)}")
+    :no_body
+  end
+
+  # Defensive clause — commented out to satisfy the Elixir 1.20 type checker.
+  # Plug.Conn.read_body/2 is typed to return only {:ok, ...}, {:more, ...},
+  # or {:error, ...}, so this clause is currently unreachable. We keep it as
+  # a reference for adapter upgrades or Plug version bumps where the return
+  # type contract may expand, at which point it should be uncommented.
+  #
+  # defp handle_read_body_result(other, _conn, _acc) do
+  #   Logger.warning("Tussle read_body unexpected: #{inspect(other)}")
+  #   :no_body
+  # end
 
   defp valid_size?(file, data_size) do
     if file.offset + data_size > file.size do
