@@ -26,6 +26,7 @@ defmodule Tussle.Post do
     else
       :too_large ->
         conn
+        |> put_resp_header("tus-resumable", config.version)
         |> resp(:request_entity_too_large, "Data is larger than expected")
 
       {:error, reason} ->

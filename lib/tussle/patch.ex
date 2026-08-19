@@ -24,24 +24,33 @@ defmodule Tussle.Patch do
       |> resp(:no_content, "")
     else
       :file_not_found ->
-        conn |> resp(:not_found, "File not found")
+        conn |> error(config, :not_found, "File not found")
 
       :offsets_mismatch ->
-        conn |> resp(:conflict, "Offset don't match")
+        conn |> error(config, :conflict, "Offset don't match")
 
       :no_body ->
-        conn |> resp(:bad_request, "No body")
+        conn |> error(config, :bad_request, "No body")
 
       :too_large ->
-        conn |> resp(:request_entity_too_large, "Data is larger than expected")
+        conn |> error(config, :request_entity_too_large, "Data is larger than expected")
 
       {:error, reason} ->
         Logger.error("Tussle PATCH failed: #{inspect(reason)}")
-        conn |> resp(:bad_request, "Unable to save file")
+        conn |> error(config, :bad_request, "Unable to save file")
 
       :too_small ->
-        conn |> resp(:conflict, "Data is smaller than what the storage backend can handle")
+        conn
+        |> error(config, :conflict, "Data is smaller than what the storage backend can handle")
     end
+  end
+
+  # The Tus-Resumable header is required in every response except those
+  # rejecting the protocol version itself.
+  defp error(conn, config, status, body) do
+    conn
+    |> put_resp_header("tus-resumable", config.version)
+    |> resp(status, body)
   end
 
   defp maybe_upload_completed(%Tussle.File{} = file, new_offset, config) do

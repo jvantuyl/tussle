@@ -23,6 +23,7 @@ defmodule Tussle.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => "imnotherelalalaa"})
     assert response.status == code(:not_found)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "error if offsets mismatch", context do
@@ -50,6 +51,7 @@ defmodule Tussle.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => uid})
     assert response.status == code(:conflict)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "error if no body", context do
@@ -76,6 +78,7 @@ defmodule Tussle.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => uid})
     assert response.status == code(:bad_request)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "error if body larger than expected", context do
@@ -107,6 +110,7 @@ defmodule Tussle.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => uid})
     assert response.status == code(:request_entity_too_large)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "error if file doesn't already exists", context do
@@ -139,6 +143,7 @@ defmodule Tussle.PatchTest do
 
     response = TestController.patch(conn, %{"uid" => uid})
     assert response.status == code(:bad_request)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "body shorter than total is ok", context do

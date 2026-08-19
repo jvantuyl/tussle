@@ -25,6 +25,7 @@ defmodule Tussle.PostTest do
 
     response = TestController.post(conn)
     assert response.status == code(:request_entity_too_large)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "`HTTP 413 Request Entity Too Large` if upload larger than a soft limit defined in the `Tus-Max-Size` header" do
@@ -41,6 +42,7 @@ defmodule Tussle.PostTest do
 
     response = TestController.post(conn)
     assert response.status == code(:request_entity_too_large)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "hard config limit override the `Tus-Max-Size` soft limit", context do
@@ -57,6 +59,7 @@ defmodule Tussle.PostTest do
 
     response = TestController.post(conn)
     assert response.status == code(:request_entity_too_large)
+    assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
   end
 
   test "create a new upload", context do
