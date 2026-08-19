@@ -150,6 +150,57 @@ config :tussle,
 - `read_body_read_length`: Size of chunks read from the socket. Larger values improve throughput for big files but use more memory per read.
 - `read_body_timeout`: Maximum time to wait for each chunk. Increase for slow clients or unreliable networks.
 
+## CORS
+
+Tussle sets no CORS headers of its own. If your uploads come from a browser on a
+different origin than the API, the host application must add them, and **an
+incomplete `Access-Control-Expose-Headers` list is the most common cause of
+uploads that appear to succeed but never resume**: a browser hides
+`Upload-Offset` and `Location` from JavaScript unless they are explicitly
+exposed, so the client cannot learn where to resume from.
+
+Using [`cors_plug`](https://hex.pm/packages/cors_plug) as an example (it is not
+a Tussle dependency, any CORS plug will do):
+
+```elixir
+plug CORSPlug,
+  origin: ["https://app.example.com"],
+  methods: ["OPTIONS", "POST", "HEAD", "GET", "PATCH", "DELETE"],
+
+  # Request headers tus clients send.
+  headers: [
+    "Authorization",
+    "Content-Type",
+    "Tus-Resumable",
+    "Upload-Length",
+    "Upload-Offset",
+    "Upload-Metadata",
+    "X-HTTP-Method-Override",
+    "X-Requested-With"
+  ],
+
+  # Response headers the client must be able to read.
+  expose: [
+    "Location",
+    "Tus-Resumable",
+    "Tus-Version",
+    "Tus-Extension",
+    "Tus-Max-Size",
+    "Upload-Offset",
+    "Upload-Length",
+    "Upload-Metadata",
+    "Upload-Expires"
+  ]
+```
+
+Two further notes:
+
+- `PATCH` must be in the allowed methods. Where it cannot be (some proxies strip
+  it), clients can fall back to `POST` with `X-HTTP-Method-Override: PATCH`,
+  which Tussle honours.
+- Keep the preflight cache short while you are still tuning this list, otherwise
+  browsers will keep reusing a stale, too-narrow preflight response.
+
 ## Protocol Compatibility
 
 Tussle implements the tus 1.0.0 core protocol and works with current

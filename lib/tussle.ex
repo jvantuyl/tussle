@@ -134,6 +134,14 @@ defmodule Tussle do
   - `base_path`:
     where in the filesystem the uploaded files'll be stored
 
+  ## CORS
+
+  Tussle sets no CORS headers itself. For cross-origin browser uploads the host
+  application must expose the response headers clients read back, at minimum
+  `Location` and `Upload-Offset`; a browser hides them from JavaScript
+  otherwise, leaving uploads unable to resume. See the README for a worked
+  example and the full header list.
+
   """
   import Plug.Conn
 
