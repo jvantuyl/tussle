@@ -20,7 +20,22 @@ defmodule Tussle.OptionsTest do
     assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
     assert response |> get_resp_header("tus-version") == [Tussle.str_supported_versions()]
     assert response |> get_resp_header("tus-max-size") == ["#{config.max_size}"]
-    assert response |> get_resp_header("tus-extension") == [Tussle.extension()]
+    assert response |> get_resp_header("tus-extension") == [Tussle.extension(config)]
+  end
+
+  describe "extension/1" do
+    test "advertises expiration when an expiration period is configured" do
+      extensions = Tussle.extension(%{expiration_period: 300}) |> String.split(",")
+
+      assert "expiration" in extensions
+    end
+
+    test "omits expiration when no expiration period is configured" do
+      extensions = Tussle.extension(%{}) |> String.split(",")
+
+      refute "expiration" in extensions
+      assert extensions == Tussle.extension() |> String.split(",")
+    end
   end
 
   test "unsupported version" do

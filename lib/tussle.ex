@@ -139,19 +139,45 @@ defmodule Tussle do
 
   @latest_version "1.0.0"
   @supported_versions ["1.0.0"]
-  @extension "creation,termination"
+  @extensions ["creation", "termination"]
 
   def latest_version, do: @latest_version
   def supported_versions, do: @supported_versions
   def str_supported_versions, do: Enum.join(@supported_versions, ",")
-  def extension, do: @extension
 
-  def options(conn, %{max_size: max_size}) do
+  @doc """
+  The extensions supported regardless of configuration, as a `Tus-Extension` value.
+
+  See `extension/1` for the value actually advertised for a given controller.
+  """
+  def extension, do: Enum.join(@extensions, ",")
+
+  @doc """
+  The extensions supported for `config`, as a `Tus-Extension` value.
+
+  The Expiration extension is only advertised when an `:expiration_period` is
+  configured, since without one no `Upload-Expires` header is ever sent.
+  """
+  def extension(config) do
+    @extensions
+    |> maybe_add_expiration(config)
+    |> Enum.join(",")
+  end
+
+  defp maybe_add_expiration(extensions, config) do
+    if Map.get(config, :expiration_period) do
+      extensions ++ ["expiration"]
+    else
+      extensions
+    end
+  end
+
+  def options(conn, %{max_size: max_size} = config) do
     conn
     |> put_resp_header("tus-resumable", latest_version())
     |> put_resp_header("tus-version", str_supported_versions())
     |> put_resp_header("tus-max-size", "#{max_size}")
-    |> put_resp_header("tus-extension", extension())
+    |> put_resp_header("tus-extension", extension(config))
     |> resp(:no_content, "")
   end
 
