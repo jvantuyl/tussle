@@ -16,8 +16,8 @@ defmodule Tussle.TussleTest do
   end
 
   describe "extension" do
-    test "extension returns supported extensions" do
-      assert Tussle.extension() == "creation,termination"
+    test "extension returns the always-supported extensions" do
+      assert Tussle.extension() == "creation,creation-with-upload,termination"
     end
   end
 end

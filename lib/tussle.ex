@@ -147,7 +147,7 @@ defmodule Tussle do
 
   @latest_version "1.0.0"
   @supported_versions ["1.0.0"]
-  @extensions ["creation", "termination"]
+  @extensions ["creation", "creation-with-upload", "termination"]
 
   def latest_version, do: @latest_version
   def supported_versions, do: @supported_versions

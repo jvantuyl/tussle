@@ -4,7 +4,7 @@ defmodule Tussle.PostTest do
   doctest Tussle.Post
 
   import Plug.Conn.Status, only: [code: 1]
-  import Tussle.TestHelpers, only: [test_conn: 2, get_config: 0]
+  import Tussle.TestHelpers, only: [test_conn: 2, test_conn: 4, get_config: 0]
   alias Tussle.TestController
 
   setup_all do
@@ -245,5 +245,164 @@ defmodule Tussle.PostTest do
     assert_receive {:init_file, %Plug.Conn{}}
 
     File.rm_rf(config.base_path |> Path.expand())
+  end
+
+  defp creation_conn(body, headers) do
+    test_conn(:post, %Plug.Conn{req_headers: headers}, "/", body)
+  end
+
+  defp offset_headers(size) do
+    [
+      {"tus-resumable", Tussle.latest_version()},
+      {"upload-length", "#{size}"},
+      {"content-type", "application/offset+octet-stream"}
+    ]
+  end
+
+  defp uid_of(response) do
+    response |> get_resp_header("location") |> List.first() |> Path.basename()
+  end
+
+  defp stored_path(config, uid) do
+    Path.join([Path.expand(config.base_path), config.storage.get_path(uid), uid])
+  end
+
+  defp stored_files(config) do
+    base = Path.expand(config.base_path)
+
+    base
+    |> Path.join("**/*")
+    |> Path.wildcard()
+    |> Enum.filter(&File.regular?/1)
+    |> Enum.sort()
+  end
+
+  describe "creation-with-upload" do
+    test "a complete body finishes the upload in one request", context do
+      config = context[:config]
+      body = "lorem ipsum sit amet 1234567890 this is a test"
+
+      response =
+        body
+        |> creation_conn(offset_headers(byte_size(body)))
+        |> TestController.post()
+
+      assert response.status == code(:created)
+      assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
+      assert response |> get_resp_header("upload-offset") == ["#{byte_size(body)}"]
+
+      uid = uid_of(response)
+      assert_receive :on_complete_upload_called
+
+      # Removed from the cache once complete, and written through to storage.
+      refute config.cache.get(config.cache_name, uid)
+
+      assert File.read!(stored_path(config, uid)) == body
+
+      File.rm_rf(config.base_path |> Path.expand())
+    end
+
+    test "a partial body can be resumed with PATCH", context do
+      config = context[:config]
+      first = "lorem ipsum "
+      rest = "sit amet"
+      size = byte_size(first) + byte_size(rest)
+
+      response =
+        first
+        |> creation_conn(offset_headers(size))
+        |> TestController.post()
+
+      assert response.status == code(:created)
+      assert response |> get_resp_header("upload-offset") == ["#{byte_size(first)}"]
+
+      uid = uid_of(response)
+      assert config.cache.get(config.cache_name, uid).offset == byte_size(first)
+
+      patched =
+        test_conn(
+          :patch,
+          %Plug.Conn{
+            req_headers: [
+              {"tus-resumable", Tussle.latest_version()},
+              {"upload-offset", "#{byte_size(first)}"},
+              {"content-type", "application/offset+octet-stream"}
+            ]
+          },
+          "/files/#{uid}",
+          rest
+        )
+        |> TestController.patch(%{"uid" => uid})
+
+      assert patched.status == code(:no_content)
+      assert patched |> get_resp_header("upload-offset") == ["#{size}"]
+
+      assert File.read!(stored_path(config, uid)) == first <> rest
+
+      File.rm_rf(config.base_path |> Path.expand())
+    end
+
+    test "an empty body still reports an offset", context do
+      config = context[:config]
+
+      response =
+        ""
+        |> creation_conn(offset_headers(10))
+        |> TestController.post()
+
+      assert response.status == code(:created)
+      assert response |> get_resp_header("upload-offset") == ["0"]
+      assert config.cache.get(config.cache_name, uid_of(response)).offset == 0
+
+      File.rm_rf(config.base_path |> Path.expand())
+    end
+
+    test "a body without the offset content type is ignored", context do
+      config = context[:config]
+
+      response =
+        "this should not be stored"
+        |> creation_conn([
+          {"tus-resumable", Tussle.latest_version()},
+          {"upload-length", "100"},
+          {"content-type", "application/octet-stream"}
+        ])
+        |> TestController.post()
+
+      assert response.status == code(:created)
+      assert response |> get_resp_header("upload-offset") == []
+      assert config.cache.get(config.cache_name, uid_of(response)).offset == 0
+
+      File.rm_rf(config.base_path |> Path.expand())
+    end
+
+    test "a body larger than upload-length is rejected without creating the upload", context do
+      config = context[:config]
+      body = "lorem ipsum sit amet"
+      before = stored_files(config)
+
+      response =
+        body
+        |> creation_conn(offset_headers(byte_size(body) - 1))
+        |> TestController.post()
+
+      assert response.status == code(:request_entity_too_large)
+      assert response |> get_resp_header("tus-resumable") == [Tussle.latest_version()]
+      assert response |> get_resp_header("location") == []
+
+      # Rejected before creation, so there is no orphan left to expire.
+      assert stored_files(config) == before
+    end
+
+    test "the extension is advertised" do
+      extensions =
+        test_conn(:options, %Plug.Conn{})
+        |> TestController.options()
+        |> get_resp_header("tus-extension")
+        |> List.first()
+        |> String.split(",")
+
+      assert "creation-with-upload" in extensions
+    end
   end
 end
