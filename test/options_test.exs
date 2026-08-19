@@ -53,6 +53,16 @@ defmodule Tussle.OptionsTest do
     assert response |> get_resp_header("tus-extension") == []
   end
 
+  test "missing version" do
+    conn = test_conn(:post, %Plug.Conn{req_headers: []})
+
+    response = TestController.post(conn)
+
+    assert response.status == code(:precondition_failed)
+    assert response |> get_resp_header("tus-version") == [Tussle.str_supported_versions()]
+    assert response |> get_resp_header("tus-resumable") == []
+  end
+
   test "method override" do
     original = "POST"
     target = "OPTIONS"

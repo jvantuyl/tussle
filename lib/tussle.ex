@@ -264,6 +264,15 @@ defmodule Tussle do
   end
 
   @doc false
+  # A request that omits Tus-Resumable is rejected exactly like one naming an
+  # unsupported version: 412, carrying Tus-Version so the client can retry.
+  def missing_version(conn) do
+    conn
+    |> put_resp_header("tus-version", str_supported_versions())
+    |> resp(:precondition_failed, "API version not specified")
+  end
+
+  @doc false
   def cache_get(%{cache: cache, cache_name: cache_name, uid: uid}) do
     cache.get(cache_name, uid)
   end

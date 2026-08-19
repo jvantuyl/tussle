@@ -89,7 +89,7 @@ defmodule Tussle.Controller do
       end
 
       defp call_versioned_method(_method, conn, %{version: nil}) do
-        Plug.Conn.resp(conn, :bad_request, "API version not specified")
+        Tussle.missing_version(conn)
       end
 
       defp call_versioned_method(method, conn, config) do
