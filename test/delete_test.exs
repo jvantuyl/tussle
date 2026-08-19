@@ -1,6 +1,5 @@
 defmodule Tussle.DeleteTest do
   use ExUnit.Case, async: true
-  use Plug.Test
   doctest Tussle.Delete
 
   import Plug.Conn.Status, only: [code: 1]

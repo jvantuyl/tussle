@@ -1,6 +1,6 @@
 defmodule Tussle.PatchTest do
   use ExUnit.Case, async: false
-  use Plug.Test
+  import Plug.Conn
   doctest Tussle.Patch
 
   import Plug.Conn.Status, only: [code: 1]

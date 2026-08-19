@@ -1,6 +1,6 @@
 defmodule Tussle.OptionsTest do
   use ExUnit.Case, async: true
-  use Plug.Test
+  import Plug.Conn
   doctest Tussle
 
   import Plug.Conn.Status, only: [code: 1]

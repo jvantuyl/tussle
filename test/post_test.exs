@@ -1,6 +1,6 @@
 defmodule Tussle.PostTest do
   use ExUnit.Case, async: false
-  use Plug.Test
+  import Plug.Conn
   doctest Tussle.Post
 
   import Plug.Conn.Status, only: [code: 1]

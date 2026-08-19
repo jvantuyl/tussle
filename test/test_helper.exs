@@ -18,7 +18,7 @@ defmodule Tussle.TestController do
 end
 
 defmodule Tussle.TestHelpers do
-  def test_conn(method, conn \\ [], uri \\ "/", body \\ nil) do
+  def test_conn(method, conn, uri \\ "/", body \\ nil) do
     Plug.Adapters.Test.Conn.conn(
       conn,
       method,

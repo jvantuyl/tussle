@@ -49,7 +49,7 @@ defmodule Tussle.Post do
       end
 
     file = %Tussle.File{
-      uid: UUID.uuid1(),
+      uid: Tussle.UID.generate(),
       size: get_size(conn),
       created_at: DateTime.to_unix(DateTime.utc_now()),
       metadata_src: metadata_src,

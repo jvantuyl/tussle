@@ -29,8 +29,9 @@ defmodule Tussle.MixProject do
 
   defp deps do
     [
-      {:plug, "~> 1.3"},
-      {:uuid, "~> 1.1"},
+      # Floor excludes Plug releases affected by CVE-2026-54892, CVE-2026-56813
+      # and CVE-2026-56814 while staying permissive for downstream consumers.
+      {:plug, ">= 1.15.4 and < 2.0.0"},
       {:ex_doc, "~> 0.23", only: :dev, runtime: false}
     ]
   end
@@ -52,6 +53,7 @@ defmodule Tussle.MixProject do
       api_reference: false,
       extras: [
         "README.md": [title: "Overview"],
+        "docs/UPSTREAM_COMPAT.md": [title: "Upstream Compatibility"],
         LICENSE: [title: "License"],
         "CHANGELOG.md": [title: "Changelog"]
       ],

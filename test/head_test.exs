@@ -1,6 +1,6 @@
 defmodule Tussle.HeadTest do
   use ExUnit.Case, async: true
-  use Plug.Test
+  import Plug.Conn
   doctest Tussle.Head
 
   import Plug.Conn.Status, only: [code: 1]

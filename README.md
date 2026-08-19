@@ -150,6 +150,14 @@ config :tussle,
 - `read_body_read_length`: Size of chunks read from the socket. Larger values improve throughput for big files but use more memory per read.
 - `read_body_timeout`: Maximum time to wait for each chunk. Increase for slow clients or unreliable networks.
 
+## Protocol Compatibility
+
+Tussle implements the tus 1.0.0 core protocol and works with current
+[tus-js-client](https://github.com/tus/tus-js-client) releases out of the box.
+See [docs/UPSTREAM_COMPAT.md](docs/UPSTREAM_COMPAT.md) for which tus extensions
+are still missing, where the IETF *Resumable Uploads for HTTP* standardisation
+effort stands, and an effort estimate for closing each gap.
+
 ## About This Fork
 
 This is a maintained fork of the original [`tus`](https://hex.pm/packages/tus) package. The package was renamed to **Tussle** to allow publishing updated versions to Hex without conflicting with the original (now unmaintained) package.
