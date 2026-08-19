@@ -1,6 +1,30 @@
 # Changelog
 
-## Unreleased
+## v0.4.0
+
+### Protocol
+
+- **Added the Creation With Upload extension**: clients may now send the first
+  part of an upload in the creation `POST` by setting
+  `Content-Type: application/offset+octet-stream`, saving a round trip. The
+  response carries `Upload-Offset` alongside `Location`, and a body that arrives
+  complete finalises the upload immediately, firing `on_complete_upload` from
+  the creation request. Advertised as `creation-with-upload` in `Tus-Extension`.
+- **Fixed `Tus-Extension` advertisement**: the Expiration extension has been
+  implemented since v0.2.0 but was never advertised, so clients had no way to
+  discover it. It is now listed whenever an `:expiration_period` is configured.
+- **Fixed missing `Tus-Resumable` on error responses**: the `PATCH`
+  404/409/413/400 branches and the `POST` 413 branch omitted the header, which
+  strict clients may read as a response from a non-tus server. The 412
+  version-rejection responses remain without it, matching the reference
+  implementation.
+
+### Behaviour Changes
+
+- **A request without `Tus-Resumable` now returns `412 Precondition Failed`**
+  with a `Tus-Version` header, instead of `400 Bad Request` with no header, as
+  the protocol requires. Callers matching on 400 for a missing version header
+  need to expect 412.
 
 ### Dependencies
 
@@ -23,6 +47,10 @@
 - **Docs**: added `docs/UPSTREAM_COMPAT.md` recording Tussle's standing against
   upstream tus clients and the IETF resumable upload draft, with an effort
   estimate for each remaining gap.
+- **Docs**: documented the CORS configuration browser clients need. An
+  incomplete `Access-Control-Expose-Headers` list is a quiet failure mode:
+  browsers hide `Location` and `Upload-Offset` from JavaScript unless they are
+  explicitly exposed, so uploads start but can never resume.
 - Replaced the deprecated `use Plug.Test` in the test suite with direct imports.
 
 ## v0.3.1

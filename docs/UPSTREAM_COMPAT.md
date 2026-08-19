@@ -3,7 +3,7 @@
 Status of Tussle against upstream tus clients and the tus protocol, and an
 estimate of the work required to close the remaining gaps.
 
-Last reviewed: 2026-08-19.
+Last reviewed: 2026-08-19, against Tussle v0.4.0.
 
 ## Upstream state
 
@@ -40,22 +40,28 @@ built against draft-05 would target an obsolete revision.
 ## Gap analysis
 
 What Tussle implements today: the tus 1.0.0 core, plus the Creation (without
-deferred length), Termination and Expiration extensions.
+deferred length), Creation With Upload, Termination and Expiration extensions.
+
+### Closed in v0.4.0
+
+| Gap | Resolution |
+|---|---|
+| `expiration` missing from `Tus-Extension` | Advertised whenever an `:expiration_period` is configured |
+| `Tus-Resumable` absent from some error responses | Added to the `PATCH` 404/409/413/400 and `POST` 413 branches |
+| `400` instead of `412` for a missing `Tus-Resumable` | Now `412 Precondition Failed` with a `Tus-Version` header |
+| CORS response header guidance | Documented in the README with a worked example |
+| `creation-with-upload` | Implemented; body accepted on creation when labelled `application/offset+octet-stream` |
+
+### Still open
 
 | # | Gap | Client trigger | State today | Effort |
 |---|---|---|---|---|
-| 1 | `expiration` missing from `Tus-Extension` | any client reading `OPTIONS` | Implemented, but `Tussle.extension/0` advertises only `creation,termination` | XS, ~15 min |
-| 2 | `Tus-Resumable` absent from some error responses | any | Omitted on the 404/409/413 branches of `Tussle.Patch` and `Tussle.Post`; the spec requires it on every response except 412 | XS, ~1 hr |
-| 3 | CORS response header guidance | all browser clients | The host application must expose `Upload-Offset`, `Location`, `Upload-Length` and friends via `Access-Control-Expose-Headers`; undocumented here | XS, docs only |
-| 4 | `creation-with-upload` | `uploadDataDuringCreation: true` | `Tussle.Post` discards any request body and returns no `Upload-Offset` in the 201 | S, ~0.5–1 day |
-| 5 | `checksum` | `Upload-Checksum` supplied via client hooks | Unsupported; header ignored | S–M, ~1 day |
-| 6 | `creation-defer-length` | `uploadLengthDeferred: true`, needed for streaming sources | `Upload-Defer-Length` ignored and size falls back to 0, so the first PATCH fails the `valid_size?` check | M, ~1–2 days |
-| 7 | `concatenation` | `parallelUploads > 1` | Unsupported. Requires partial uploads plus a final concatenation, which extends the `Tussle.Storage` behaviour and therefore affects `tus_storage_s3` | L, ~3–5 days |
-| 8 | IETF Resumable Uploads for HTTP | `protocol: 'ietf-draft-05'` | None | XL, ~2–3 weeks |
+| 1 | `checksum` | `Upload-Checksum` supplied via client hooks | Unsupported; header ignored | S–M, ~1 day |
+| 2 | `creation-defer-length` | `uploadLengthDeferred: true`, needed for streaming sources | `Upload-Defer-Length` ignored and size falls back to 0, so the first PATCH fails the size check | M, ~1–2 days |
+| 3 | `concatenation` | `parallelUploads > 1` | Unsupported. Requires partial uploads plus a final concatenation, which extends the `Tussle.Storage` behaviour and therefore affects `tus_storage_s3` | L, ~3–5 days |
+| 4 | IETF Resumable Uploads for HTTP | `protocol: 'ietf-draft-05'` | None | XL, ~2–3 weeks |
 
-Items 1 and 2 are protocol-conformance bugs rather than missing features.
-
-### What item 8 actually involves
+### What the IETF draft actually involves
 
 Beyond a second request/response vocabulary, IETF draft support needs:
 
@@ -71,15 +77,11 @@ Beyond a second request/response vocabulary, IETF draft support needs:
 
 ## Recommendation
 
-**Do now (~2 days).** Items 1, 2, 3 and 4. Items 1 and 2 are conformance
-bugs worth fixing regardless of client. Item 4 is cheap and removes a whole
-round trip per upload for clients that opt into it.
-
-**Do on demand.** Items 5, 6 and 7, driven by real requirements. Item 7 is the
+**Do on demand.** Items 1, 2 and 3, driven by real requirements. Item 3 is the
 one that reaches into the storage backends, so it should not be started without
 a concrete need for parallel uploads.
 
-**Defer item 8.** Implementing it now means choosing between a draft revision no
+**Defer item 4.** Implementing it now means choosing between a draft revision no
 client speaks (draft-12) and one the specification has left behind (draft-05).
 The sensible trigger to revisit is the draft reaching RFC status, or
 tus-js-client shipping non-experimental support for a later revision. Watch

@@ -25,9 +25,13 @@ Due to its modularization and extensibility, support for any other cloud provide
 
 This library implements the core TUS API v1.0.0 protocol and the following extensions:
 
-- Creation Protocol (http://tus.io/protocols/resumable-upload.html#creation). Deferring the upload's length is not possible.
-- Termination Protocol (http://tus.io/protocols/resumable-upload.html#termination)
-- Expiration Protocol (https://tus.io/protocols/resumable-upload.html#expiration)
+- [Creation](http://tus.io/protocols/resumable-upload.html#creation)
+- [Creation With Upload](https://tus.io/protocols/resumable-upload.html#creation-with-upload) -- send the first chunk with the creation request
+- [Termination](http://tus.io/protocols/resumable-upload.html#termination)
+- [Expiration](https://tus.io/protocols/resumable-upload.html#expiration) -- advertised only when `expiration_period` is configured
+
+Deferring the upload's length is not supported; `Upload-Length` must be known at
+creation time.
 
 ## Installation
 
@@ -36,7 +40,7 @@ Add this repo to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:tussle, "~> 0.2.0"},
+    {:tussle, "~> 0.4.0"},
   ]
 end
 ```
